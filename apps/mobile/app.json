@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Tickr",
+    "slug": "tickr",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "tickr",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.madina.tickr"
+    },
+    "android": {
+      "package": "dev.madina.tickr.rn",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0E11"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

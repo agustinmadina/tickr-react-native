@@ -1,0 +1,23 @@
+node_modules/
+dist/
+dist-web/
+build/
+.expo/
+.turbo/
+*.tsbuildinfo
+
+# Native build output
+apps/mobile/ios/
+apps/mobile/android/
+!apps/mobile/ios/.gitkeep
+
+# Env
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
