@@ -7,8 +7,8 @@
 ![React%20Native](https://img.shields.io/badge/React%20Native-0.81.5-61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020)
 
-A sample project: a portfolio tracker with live prices, streamed from Coinbase over a WebSocket,
-and the same three targets from a single codebase.
+A sample project: a portfolio tracker with live prices streamed from Coinbase over a WebSocket,
+running on Android, iOS and the web from one TypeScript codebase.
 
 The interesting part of this repository is not the feature set, it is the architecture. Clean
 architecture, one dependency rule, and the same UI running on a phone and in a browser. The
@@ -33,9 +33,9 @@ platform it is on.
 
 ## Architecture
 
-Clean architecture, with the same dependency rule as the Kotlin project, enforced by tooling rather
-than by convention. `ui` never imports `data`, `domain` imports nothing but the standard library,
-and `core/` holds no business types.
+Clean architecture with a single dependency rule, enforced by tooling rather than by convention.
+`ui` never imports `data`, `domain` imports nothing but the standard library, and `core/` holds no
+business types.
 
 ```
 packages/
@@ -150,9 +150,9 @@ React Native 0.81.5, React 19.1.0, Expo SDK 54, on the New Architecture, Hermes 
 
 The interesting problems in this project are the ones you only meet when the UI is shared too:
 
-- **Recomposition is automatic; re-rendering is not.** Compose tracks which state each composable
-  read and recomposes only those. React has no such tracking, and prices arrive several times a
-  second, so a component that reads the whole store re-renders several times a second.
+- **Re-rendering is the thing you have to manage yourself.** React re-renders a component whenever
+  the state it subscribes to changes, and prices arrive several times a second, so a component that
+  reads the whole store re-renders several times a second.
   [`usePortfolio`](packages/features/portfolio/ui/src/store/usePortfolio.ts:26) forces every read
   through a selector that returns a primitive or a stable reference. It is the difference between a
   list that scrolls and a list that stutters.
@@ -200,8 +200,8 @@ with fifty engineers and millions of users.
 
 Products for **Disney**, **NewsCorp**, **WWE**, **MarketWatch** and **Deloitte**. The last five
 years in wallets, payments and decentralized identity: multi-chain transaction signing for Bitcoin,
-XRP and Solana, debit card and ACH flows, and a refactor of a production wallet from RxJava to
-Coroutines and from views to Compose without pausing delivery.
+XRP and Solana, debit card and ACH flows, and a UI-layer refactor of a production wallet shipped
+without pausing the release train.
 
 This is a sample project: a small product, a real architecture, in the stack most teams already
 have, and an honest account of what that costs. The decisions I would defend in a review are
@@ -234,9 +234,9 @@ npx expo export --platform web --output-dir dist-web
 
 The portfolio persists across restarts on all three platforms, so what you add stays added.
 
-**Not SQLDelight and not a database.** A portfolio is a handful of rows read and written whole, so a
-serialised document in each platform's own store is proportionate: MMKV on native, `localStorage` on
-web, behind one adapter. MMKV is synchronous, so the read on startup does not flash an empty state.
+**Not a database.** A portfolio is a handful of rows read and written whole, so a serialised document
+in each platform's own store is proportionate: MMKV on native, `localStorage` on web, behind one
+adapter. MMKV is synchronous, so the read on startup does not flash an empty state.
 
 ## What is not here
 
