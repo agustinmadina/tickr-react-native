@@ -1,27 +1,25 @@
 # Tickr React Native
 
-**The Tickr app from the Kotlin Multiplatform project, ported to React Native. Android, iOS and the web, from one TypeScript codebase.**
+**A crypto portfolio tracker built from scratch in React Native and Expo. Android, iOS and the web, from one TypeScript codebase.**
 
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Web-5B8DEF)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6)
-![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61DAFB)
+![React%20Native](https://img.shields.io/badge/React%20Native-0.81.5-61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020)
 
-Same app, same architecture, same three targets as the Kotlin original, written in TypeScript.
-Prices are live, streamed from Coinbase over a WebSocket.
+A sample project: a portfolio tracker with live prices, streamed from Coinbase over a WebSocket,
+and the same three targets from a single codebase.
 
-The point of the port is not to replace the Kotlin one. It is to answer a question: how much of
-what makes that project good survives the move, and what has to be rebuilt by hand? The original
-shares everything through Compose Multiplatform, one implementation of every screen. Here the
-sharing is different in kind, and the interesting part of this repository is where that difference
-shows up.
+The interesting part of this repository is not the feature set, it is the architecture. Clean
+architecture, one dependency rule, and the same UI running on a phone and in a browser. The
+decisions worth defending are written down next to the code that makes them.
 
 ---
 
 ## What is actually shared
 
-React Native shares the business logic by default and the UI by convention. That is the opposite
-trade to Kotlin Multiplatform, and it is visible in the same table.
+React Native shares the business logic by default and the UI by convention, and this project leans
+into both.
 
 | | Android | iOS | Web |
 |---|---|---|---|
@@ -32,20 +30,6 @@ trade to Kotlin Multiplatform, and it is visible in the same table.
 There is no `MainActivity`, no `ContentView.swift` and no `index.html` per platform. Expo Router
 resolves the same route tree on all three, and the storage adapter is the only file that knows which
 platform it is on.
-
-| Concern | Kotlin Multiplatform | React Native | Verdict |
-|---|---|---|---|
-| UI | Compose Multiplatform | React Native + Expo | Rewritten. Same structure, different primitives. |
-| Navigation | Navigation Compose | Expo Router | Rewritten. File-based rather than a graph. |
-| Async streams | `Flow` | `AsyncIterable` | **Carried over.** Language-level, no library. |
-| Cancellation | `CoroutineScope` | `AbortController` | Rewritten. Explicit, and easy to leak. |
-| DI | Koin | Plain functions | **Improved.** Compile-time, not runtime. |
-| Persistence | multiplatform-settings | MMKV / localStorage | Carried over. Same `expect`/`actual` shape. |
-| Networking | Ktor | `fetch` + `WebSocket` | Rewritten. The platform already has both. |
-| Serialisation | kotlinx.serialization | Zod | **Improved.** Validation and types in one. |
-| State | `MutableStateFlow` + MVI | Zustand | Rewritten. The subscription model is the hard part. |
-| Architecture enforcement | Gradle module graph | ESLint boundaries | Rewritten. Weaker, but it does fail the build. |
-| Tests | Kotest BehaviorSpec | Vitest | Rewritten. Same cases, different syntax. |
 
 ## Architecture
 
@@ -113,10 +97,9 @@ graph TD
     linkStyle 14 stroke:#F2555A,stroke-dasharray:4 4
 ```
 
-The dashed line is the one that matters, and it is the one that got weaker in the move. In the Kotlin
-project `ui` does not declare a dependency on `data`, so a violation fails to compile. npm workspaces
-do not care, so the guarantee is rebuilt with `eslint-plugin-boundaries` and a violation fails
-`npm run lint` instead. It is enforceable, not free.
+The dashed line is the one that matters. npm workspaces do not enforce it on their own, so the
+guarantee is built with `eslint-plugin-boundaries` and a violation fails `npm run lint`. It is
+enforceable, not free.
 
 A few decisions worth the click if you are reviewing this technically:
 
@@ -124,7 +107,7 @@ A few decisions worth the click if you are reviewing this technically:
   plain TypeScript, which is what makes `computePortfolio` testable without a DOM or a mock.
 - **The composition root is a function, not a container.** [`createAppStore`](packages/features/portfolio/di/src/index.ts:40)
   takes its dependencies as arguments and returns the store. That is the whole of the DI layer, and
-  it is why there is no Koin equivalent to keep in step.
+  it is why there is no container to keep in step.
 - **Merging streams happens in the store, never in a component.** The portfolio is holdings and
   prices combined; doing that in a screen is how screens grow until nobody can say where a value
   came from. Components read one pre-merged value.
@@ -185,11 +168,10 @@ The interesting problems in this project are the ones you only meet when the UI 
 - **The web bundle is compiled, not shipped.** `expo export` produces a static site, and the same
   code that runs on the phone hydrates in the browser.
 
-## The bugs that were ported on purpose
+## Three behaviours that look like bugs and are not
 
-Three behaviours in the Kotlin price feed look like mistakes and are not. They are reproduced here
-with comments explaining why, because a port that silently "fixes" them changes behaviour the app
-depends on.
+Three behaviours in the price feed look like mistakes and are not. They are kept, with comments
+explaining why, because "fixing" them silently changes behaviour the app depends on.
 
 1. **The failure counter resets on the first message, not on connect.** A socket that connects and
    then immediately drops would otherwise reset the backoff every time and reconnect in a tight loop.
@@ -213,18 +195,17 @@ maths.
 
 ## Who built this
 
-**Agustin Madina**, Android and Kotlin Multiplatform engineer. Ten years shipping mobile, from
-solo-founder MVPs to apps with fifty engineers and millions of users.
+**Agustin Madina**, mobile engineer. Ten years shipping apps, from solo-founder MVPs to products
+with fifty engineers and millions of users.
 
 Products for **Disney**, **NewsCorp**, **WWE**, **MarketWatch** and **Deloitte**. The last five
 years in wallets, payments and decentralized identity: multi-chain transaction signing for Bitcoin,
 XRP and Solana, debit card and ACH flows, and a refactor of a production wallet from RxJava to
 Coroutines and from views to Compose without pausing delivery.
 
-The Kotlin project is the argument for sharing a UI from one codebase. This port is the counterpoint:
-the same app, the same architecture, in the stack most teams already have, and an honest account of
-what that costs. The decisions I would defend in a review are written down next to the code that
-makes them, including the ones where the port is measurably worse than the original.
+This is a sample project: a small product, a real architecture, in the stack most teams already
+have, and an honest account of what that costs. The decisions I would defend in a review are
+written down next to the code that makes them, including the ones where the trade-off is real.
 
 - [LinkedIn](https://www.linkedin.com/in/agustin-madina/)
 - [github.com/agustinmadina](https://github.com/agustinmadina)
@@ -259,8 +240,7 @@ web, behind one adapter. MMKV is synchronous, so the read on startup does not fl
 
 ## What is not here
 
-- **No component tests.** The pure logic is tested; the screens are not. The Kotlin project has the
-  same gap, and it is the same reason: the screens are mostly layout, and the layout is verified by
-  looking at it.
-- **No E2E.** The Kotlin project has none either.
-- **No CI.** The Kotlin project deploys its web build on every push to `main`. This does not, yet.
+- **No component tests.** The pure logic is tested; the screens are not. The screens are mostly
+  layout, and the layout is verified by looking at it.
+- **No E2E.**
+- **No CI.** The web build is not deployed on every push to `main`, yet.

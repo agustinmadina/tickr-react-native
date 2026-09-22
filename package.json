@@ -2,7 +2,7 @@
   "name": "tickr-react-native",
   "version": "0.1.0",
   "private": true,
-  "description": "Tickr, reimplemented in React Native. Same product, different mental model.",
+  "description": "Tickr, a crypto portfolio tracker built from scratch in React Native and Expo.",
   "workspaces": [
     "apps/*",
     "packages/core/*",
@@ -16,6 +16,7 @@
     "react-native-worklets": "0.8.3"
   },
   "scripts": {
+    "postinstall": "node scripts/copy-canvaskit.mjs",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test",
